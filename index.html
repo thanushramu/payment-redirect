@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Processing your order…</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 36px;
+      text-align: center;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+      max-width: 380px;
+      width: 90%;
+    }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #16a34a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 { font-size: 20px; color: #111827; margin-bottom: 10px; }
+    p  { font-size: 14px; color: #6b7280; line-height: 1.6; }
+    .note { margin-top: 24px; font-size: 12px; color: #9ca3af; }
+    .error { color: #dc2626; font-size: 13px; margin-top: 16px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="spinner"></div>
+    <h1>Preparing your payment…</h1>
+    <p>Please wait while we set up your order.<br>
+    You'll be redirected to payment in a moment.</p>
+    <div class="note">Please do not close or refresh this page.</div>
+    <div class="error" id="err">
+      Something went wrong. Please contact us.
+    </div>
+  </div>
+
+  <script>
+    // ── FILL IN YOUR VALUE BELOW ──────────────────────────────
+    
+const MAKE_URL = "PASTE_YOUR_MAKE_WEBHOOK_RESPONSE_URL_HERE";
+
+    // ──────────────────────────────────────────────────────────
+
+    const params       = new URLSearchParams(window.location.search);
+    const submissionId = params.get("submissionId");
+    let   attempts     = 0;
+    const MAX_ATTEMPTS = 15; // stop after 30 seconds
+
+    async function checkUrl() {
+      try {
+        const res  = await fetch(MAKE_URL + "?id=" + submissionId);
+        const data = await res.json();
+
+        if (data.url) {
+          window.location.href = data.url; // ✅ redirect to Billplz
+        } else if (attempts < MAX_ATTEMPTS) {
+          attempts++;
+          setTimeout(checkUrl, 2000); // try again in 2s
+        } else {
+          document.getElementById("err").style.display = "block";
+        }
+      } catch (e) {
+        if (attempts < MAX_ATTEMPTS) {
+          attempts++;
+          setTimeout(checkUrl, 2000);
+        }
+      }
+    }
+
+    checkUrl(); // start immediately on page load
+  </script>
+</body>
+</html>
