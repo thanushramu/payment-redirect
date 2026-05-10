@@ -1,11 +1,7 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "payment-redirect",
-  "main": "_worker.js",
   "compatibility_date": "2026-05-09",
-  "observability": {
-    "enabled": true
-  },
+  "pages_build_output_dir": ".",
   "compatibility_flags": [
     "nodejs_compat"
   ]
